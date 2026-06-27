@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -21,8 +25,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAll() {
-        return service.findAll();
+    public Page<Product> getAll(Pageable pageable) {
+        return service.findAll(pageable);
     }
 
     @GetMapping("/{id}")
@@ -33,12 +37,12 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product create(@RequestBody Product entity) {
+    public Product create(@Valid @RequestBody Product entity) {
         return service.save(entity);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@PathVariable UUID id, @RequestBody Product entity) {
+    public ResponseEntity<Product> update(@PathVariable UUID id, @Valid @RequestBody Product entity) {
         return service.findById(id).map(existing -> {
             // Assuming the client passed the correct ID in the path
             return ResponseEntity.ok(service.save(entity));

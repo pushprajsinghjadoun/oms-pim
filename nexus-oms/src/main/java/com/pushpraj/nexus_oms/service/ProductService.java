@@ -5,6 +5,9 @@ import com.pushpraj.nexus_oms.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,8 +22,8 @@ public class ProductService {
         this.repository = repository;
     }
 
-    public List<Product> findAll() {
-        return repository.findAll();
+    public Page<Product> findAll(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     public Optional<Product> findById(UUID id) {

@@ -2,6 +2,7 @@ package com.pushpraj.nexus_oms.controller;
 
 import com.pushpraj.nexus_oms.entity.FileImportLog;
 import com.pushpraj.nexus_oms.service.ProductFileUploadService;
+import com.pushpraj.nexus_oms.service.ProductImportProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +14,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductFileUploadController {
 
     private final ProductFileUploadService fileUploadService;
+    private final ProductImportProcessorService processorService;
 
     @Autowired
-    public ProductFileUploadController(ProductFileUploadService fileUploadService) {
+    public ProductFileUploadController(ProductFileUploadService fileUploadService,
+                                       ProductImportProcessorService processorService) {
         this.fileUploadService = fileUploadService;
+        this.processorService = processorService;
     }
 
     @PostMapping
@@ -31,8 +35,14 @@ public class ProductFileUploadController {
         }
 
         try {
+            // Save file and log as QUEUED
             FileImportLog log = fileUploadService.uploadFile(file);
-            return ResponseEntity.status(HttpStatus.CREATED).body(log);
+            
+            // Trigger asynchronous processing immediately
+            processorService.processFileAsync(log.getId());
+            
+            // Return 202 Accepted, indicating processing has started in the background
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(log);
             
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
